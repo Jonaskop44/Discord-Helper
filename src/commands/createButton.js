@@ -55,84 +55,95 @@ module.exports = {
           (role) => role.name === "Helfer"
         );
         if (helper) {
-          helper.members.forEach(async (member) => {
-            try {
-              //Helper Buttons
-              const confirm = new ButtonBuilder()
-                .setCustomId("can")
-                .setLabel("Ich kann helfen!")
-                .setStyle(ButtonStyle.Success);
+          try {
+            //Helper Buttons
+            const confirm = new ButtonBuilder()
+              .setCustomId("can")
+              .setLabel("Ich kann helfen!")
+              .setStyle(ButtonStyle.Success);
 
-              const deny = new ButtonBuilder()
-                .setCustomId("cant")
-                .setLabel("Ich kann nicht helfen!")
-                .setStyle(ButtonStyle.Danger);
+            const deny = new ButtonBuilder()
+              .setCustomId("cant")
+              .setLabel("Ich kann nicht helfen!")
+              .setStyle(ButtonStyle.Danger);
 
-              const row = new ActionRowBuilder().addComponents(confirm, deny);
-              const helperMessage = await member.send({
-                content: `Der User ${userInstructing.username} braucht Hilfe!`,
-                components: [row],
-              });
+            const row = new ActionRowBuilder().addComponents(confirm, deny);
 
-              const helperCollector =
-                helperMessage.createMessageComponentCollector({
-                  componentType: ComponentType.BUTTON,
-                });
+            //Send message to all helpers that not that person is asking for help
+            helper.members.forEach(async (member) => {
+              if (member.id !== userInstructing.id) {
+                try {
+                  const helperMessage = await member.send({
+                    content: `Der User ${userInstructing.username} braucht Hilfe!`,
+                    components: [row],
+                  });
+                  console.log("Message sent");
 
-              helperCollector.on("collect", async (interaction) => {
-                await interaction.deferUpdate();
-
-                //Helper can help
-                if (interaction.customId === "can") {
-                  const user = interaction.user;
-                  try {
-                    user.send("Du wurdest als Helfer eingetragen!");
-                    userInstructing.send(`✅ ${user.username} hilft dir!`);
-
-                    //Send message to all other helpers
-                    helper.members.forEach(async (member) => {
-                      if (member.id !== user.id) {
-                        try {
-                          member.send(
-                            `Du brauchst nicht mehr helfen! ${user.username} hilft nun ${userInstructing.username}!`
-                          );
-                        } catch (error) {
-                          console.log(error);
-                        }
-                      }
+                  const helperCollector =
+                    helperMessage.createMessageComponentCollector({
+                      componentType: ComponentType.BUTTON,
                     });
-                    confirm.setDisabled(true);
-                    deny.setDisabled(true);
-                    row.components = [confirm, deny];
-                    await helperMessage.edit({ components: [row] });
-                  } catch (error) {
-                    console.log(error);
-                  }
-                  return;
-                }
 
-                //Helper can't help
-                if (interaction.customId === "cant") {
-                  const user = interaction.user;
-                  try {
-                    user.send("Du wurdest als Helfer ausgetragen!");
-                    userInstructing.send(
-                      `❌ ${user.username} kann nicht helfen!`
-                    );
-                    confirm.setDisabled(true);
-                    deny.setDisabled(true);
-                    row.components = [confirm, deny];
-                    await interaction.message.edit({ components: [row] });
-                  } catch (error) {
-                    console.log(error);
-                  }
-                  return;
+                  helperCollector.on("collect", async (interaction) => {
+                    await interaction.deferUpdate();
+
+                    //Helper can help
+                    if (interaction.customId === "can") {
+                      const user = interaction.user;
+                      try {
+                        user.send("Du wurdest als Helfer eingetragen!");
+                        userInstructing.send(`✅ ${user.username} hilft dir!`);
+
+                        //Send message to all other helpers
+                        helper.members.forEach(async (member) => {
+                          if (member.id !== user.id) {
+                            if (member.id !== userInstructing.id) {
+                              try {
+                                member.send(
+                                  `Du brauchst nicht mehr helfen! ${user.username} hilft nun ${userInstructing.username}!`
+                                );
+                              } catch (error) {
+                                console.log(error);
+                              }
+                            }
+                          }
+                        });
+                        confirm.setDisabled(true);
+                        deny.setDisabled(true);
+                        row.components = [confirm, deny];
+                        await helperMessage.edit({ components: [row] });
+                      } catch (error) {
+                        console.log(error);
+                      }
+                      return;
+                    }
+
+                    //Helper can't help
+                    if (interaction.customId === "cant") {
+                      const user = interaction.user;
+                      try {
+                        user.send("Du wurdest als Helfer ausgetragen!");
+                        userInstructing.send(
+                          `❌ ${user.username} kann nicht helfen!`
+                        );
+                        confirm.setDisabled(true);
+                        deny.setDisabled(true);
+                        row.components = [confirm, deny];
+                        await helperMessage.edit({ components: [row] });
+                      } catch (error) {
+                        console.log(error);
+                      }
+                      return;
+                    }
+                  });
+                } catch (error) {
+                  console.log(error);
                 }
-              });
-            } catch (error) {
-              console.log(error);
-            }
-          });
+              }
+            });
+          } catch (error) {
+            console.log(error);
+          }
         }
         return;
       }
