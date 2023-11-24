@@ -9,9 +9,7 @@ A Discord Bot that creates a button through which the user can request help from
 
 <!-- GETTING STARTED DEVELOPMENT  -->
 
-### Slash Commands
-
----
+## Slash Commands
 
 - **/create**
 
