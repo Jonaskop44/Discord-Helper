@@ -34,7 +34,7 @@ client.on("ready", () => {
   client.user.setPresence({
     activities: [
       {
-        name: "deiner Mutter zu",
+        name: ".gg/coding",
         type: ActivityType.Watching,
       },
     ],
@@ -52,7 +52,7 @@ client.on("interactionCreate", async (interaction) => {
         console.log(error);
 
         if (interaction.deferred || interaction.replied) {
-          interaction.editReply("Es ist ein Fehler aufgetreten.");
+          interaction.editReply("Error while executing this command!");
         }
       }
     }

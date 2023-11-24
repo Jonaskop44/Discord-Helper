@@ -10,26 +10,17 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("create")
-    .setDescription("Erstellt einen Hilfe Button"),
+    .setDescription("Create a help button"),
   async execute(interaction) {
-    //Check if user is allowed to use this command
-    const allowedUsers = "462268557783203840";
-    if (interaction.user.id !== allowedUsers) {
-      await interaction.reply(
-        "Du bist nicht berechtigt diesen Command zu nutzen!"
-      );
-      return;
-    }
-
     //Discord-Server Button
     const confirm = new ButtonBuilder()
       .setCustomId("help")
-      .setLabel("Hilfe!")
+      .setLabel("Help!")
       .setStyle(ButtonStyle.Success);
 
     const row = new ActionRowBuilder().addComponents(confirm);
     const reply = await interaction.reply({
-      content: `Wenn du hilfe brauchst, drücke den Button!`,
+      content: `If you need help, click the button!`,
       components: [row],
     });
 
@@ -43,28 +34,26 @@ module.exports = {
       if (interaction.customId === "help") {
         const userInstructing = interaction.user;
         try {
-          userInstructing.send(
-            "Die berechtigten Personen wurden benachrichtigt!"
-          );
+          userInstructing.send("The authorized persons have been notified!");
         } catch (error) {
           console.log(error);
         }
 
         //Get all Helper
         const helper = interaction.guild.roles.cache.find(
-          (role) => role.name === "Helfer"
+          (role) => role.name === "Helper"
         );
         if (helper) {
           try {
             //Helper Buttons
             const confirm = new ButtonBuilder()
               .setCustomId("can")
-              .setLabel("Ich kann helfen!")
+              .setLabel("I can help!")
               .setStyle(ButtonStyle.Success);
 
             const deny = new ButtonBuilder()
               .setCustomId("cant")
-              .setLabel("Ich kann nicht helfen!")
+              .setLabel("I cant help!")
               .setStyle(ButtonStyle.Danger);
 
             const row = new ActionRowBuilder().addComponents(confirm, deny);
@@ -74,7 +63,7 @@ module.exports = {
               if (member.id !== userInstructing.id) {
                 try {
                   const helperMessage = await member.send({
-                    content: `Der User ${userInstructing.username} braucht Hilfe!`,
+                    content: `The user ${userInstructing.username} needs help!`,
                     components: [row],
                   });
                   console.log("Message sent");
@@ -91,8 +80,8 @@ module.exports = {
                     if (interaction.customId === "can") {
                       const user = interaction.user;
                       try {
-                        user.send("Du wurdest als Helfer eingetragen!");
-                        userInstructing.send(`✅ ${user.username} hilft dir!`);
+                        user.send("You have been registered as a helper!");
+                        userInstructing.send(`✅ ${user.username} helps you!`);
 
                         //Send message to all other helpers
                         helper.members.forEach(async (member) => {
@@ -100,7 +89,7 @@ module.exports = {
                             if (member.id !== userInstructing.id) {
                               try {
                                 member.send(
-                                  `Du brauchst nicht mehr helfen! ${user.username} hilft nun ${userInstructing.username}!`
+                                  `You no longer need to help! ${user.username} helps ${userInstructing.username}!`
                                 );
                               } catch (error) {
                                 console.log(error);
@@ -122,9 +111,9 @@ module.exports = {
                     if (interaction.customId === "cant") {
                       const user = interaction.user;
                       try {
-                        user.send("Du wurdest als Helfer ausgetragen!");
+                        user.send("You were signed out as a helper!");
                         userInstructing.send(
-                          `❌ ${user.username} kann nicht helfen!`
+                          `❌ ${user.username} can't help you!`
                         );
                         confirm.setDisabled(true);
                         deny.setDisabled(true);
